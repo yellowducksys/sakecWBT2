@@ -2,374 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Live Student Attendance Counter</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .container {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f4ff;
       padding: 30px;
-      width: 100%;
-      max-width: 860px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
-
-    .header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .header h1 {
-      font-size: 1.8rem;
-      color: #e0e0ff;
-      letter-spacing: 1px;
-    }
-
-    .header p {
-      color: #8888aa;
-      margin-top: 6px;
-      font-size: 0.9rem;
-    }
-
-    .badge {
-      display: inline-block;
-      background: #4f46e5;
-      color: white;
-      border-radius: 20px;
-      padding: 3px 12px;
-      font-size: 0.75rem;
-      margin-top: 8px;
-      letter-spacing: 0.5px;
-    }
-
-    .stats-row {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 14px 22px;
-      text-align: center;
-      min-width: 130px;
-    }
-
-    .stat-card .label {
-      color: #8888aa;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .stat-card .value {
-      color: #c7c7ff;
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    #currentCount { color: #6ee7b7; }
-    #peakCount    { color: #fbbf24; }
-    #totalUpdates { color: #818cf8; }
-
-    .chart-wrapper {
-      position: relative;
-      background: rgba(0,0,0,0.2);
-      border-radius: 14px;
-      padding: 20px;
-    }
-
-    .live-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: #6ee7b7;
-      border-radius: 50%;
-      margin-right: 6px;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.2; }
-    }
-
-    .chart-title {
-      color: #c7c7ff;
-      font-size: 0.85rem;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 22px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      padding: 10px 22px;
-      border: none;
+    h2 { color: #333; margin-bottom: 6px; }
+    p  { color: #666; margin-bottom: 20px; font-size: 14px; }
+    canvas {
+      background: white;
+      border: 1px solid #ddd;
       border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      padding: 10px;
+      max-width: 700px;
+      width: 100%;
+    }
+    .btns { margin-top: 20px; }
+    button {
+      margin: 5px;
+      padding: 10px 24px;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s ease;
     }
-
-    #startBtn  { background: #4f46e5; color: white; }
-    #pauseBtn  { background: #0f766e; color: white; }
-    #resetBtn  { background: #7f1d1d; color: #fca5a5; }
-
-    button:hover { transform: translateY(-2px); opacity: 0.9; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    .footer {
-      text-align: center;
-      margin-top: 18px;
-      color: #555577;
-      font-size: 0.78rem;
-    }
+    #startBtn { background: #4CAF50; color: white; }
+    #resetBtn { background: #f44336; color: white; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .footer { margin-top: 20px; color: #aaa; font-size: 13px; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="header">
-    <h1>&#128204; Live Student Attendance Counter</h1>
-    <p>Real-time classroom attendance simulation</p>
-    <span class="badge">Updates every 3 seconds &bull; Last 8 records shown</span>
+  <h2>📊 Live Student Attendance Counter</h2>
+  <p>Generates a new attendance value every 3 seconds &bull; Shows last 8 records</p>
+
+  <canvas id="myChart"></canvas>
+
+  <div class="btns">
+    <button id="startBtn" onclick="start()">▶ Start</button>
+    <button id="resetBtn" onclick="reset()">↺ Reset</button>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="label">Current</div>
-      <div class="value" id="currentCount">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Peak</div>
-      <div class="value" id="peakCount">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="label">Updates</div>
-      <div class="value" id="totalUpdates">0</div>
-    </div>
-  </div>
-
-  <div class="chart-wrapper">
-    <div class="chart-title">
-      <span class="live-dot"></span> Attendance vs Time Interval
-    </div>
-    <canvas id="attendanceChart" height="280"></canvas>
-  </div>
-
-  <div class="controls">
-    <button id="startBtn" onclick="startCounter()">&#9654; Start</button>
-    <button id="pauseBtn" onclick="pauseCounter()" disabled>&#9646;&#9646; Pause</button>
-    <button id="resetBtn" onclick="resetCounter()">&#8635; Reset</button>
-  </div>
-</div>
-
-<div class="footer">
-  SAKEC &bull; Web Technology &bull; Roll No. 32 &bull; Harsh Mange
-</div>
+  <div class="footer">SAKEC &bull; Web Technology &bull; Roll No. 32 &bull; Harsh Mange</div>
 
 <script>
-  const MAX_RECORDS = 8;
-  const MAX_STUDENTS = 60;
-  const INTERVAL_MS = 3000;
+  const labels = [];
+  const values = [];
+  let timer = null;
 
-  let labels = [];
-  let data = [];
-  let intervalId = null;
-  let updateCount = 0;
-  let peak = 0;
-  let intervalNum = 0;
-  let paused = false;
-
-  // Build gradient for bars
-  function getGradient(ctx, chartArea) {
-    const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-    grad.addColorStop(0, 'rgba(99, 102, 241, 0.95)');
-    grad.addColorStop(1, 'rgba(99, 102, 241, 0.25)');
-    return grad;
-  }
-
-  const ctx = document.getElementById('attendanceChart').getContext('2d');
-
-  const chart = new Chart(ctx, {
+  const chart = new Chart(document.getElementById('myChart'), {
     type: 'bar',
     data: {
-      labels: [],
+      labels: labels,
       datasets: [{
         label: 'Students Present',
-        data: [],
-        backgroundColor: function(context) {
-          const chart = context.chart;
-          const { ctx, chartArea } = chart;
-          if (!chartArea) return 'rgba(99,102,241,0.7)';
-          return getGradient(ctx, chartArea);
-        },
-        borderColor: 'rgba(129, 140, 248, 0.9)',
-        borderWidth: 2,
-        borderRadius: 8,
-        borderSkipped: false,
+        data: values,
+        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
       }]
     },
     options: {
-      responsive: true,
-      animation: { duration: 600, easing: 'easeOutQuart' },
       scales: {
         y: {
           beginAtZero: true,
           min: 0,
-          max: MAX_STUDENTS,
-          grid: { color: 'rgba(255,255,255,0.06)' },
-          ticks: {
-            color: '#9999bb',
-            stepSize: 10,
-            font: { size: 12 }
-          },
-          title: {
-            display: true,
-            text: 'Number of Students',
-            color: '#9999bb',
-            font: { size: 13 }
-          }
+          max: 60,
+          title: { display: true, text: 'No. of Students' }
         },
         x: {
-          grid: { display: false },
-          ticks: { color: '#9999bb', font: { size: 12 } },
-          title: {
-            display: true,
-            text: 'Time Interval',
-            color: '#9999bb',
-            font: { size: 13 }
-          }
-        }
-      },
-      plugins: {
-        legend: {
-          labels: { color: '#c7c7ff', font: { size: 13 } }
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.parsed.y} students present`
-          }
+          title: { display: true, text: 'Time' }
         }
       }
     }
   });
 
-  function generateAttendance() {
-    // Simulate realistic fluctuation: ±5 from previous, clamped between 10-60
-    let prev = data.length > 0 ? data[data.length - 1] : 30;
-    let next = prev + Math.floor(Math.random() * 11) - 5;
-    next = Math.max(10, Math.min(MAX_STUDENTS, next));
-    return next;
-  }
+  function addData() {
+    const time = new Date().toLocaleTimeString();
+    const count = Math.floor(Math.random() * 51) + 10; // 10 to 60
 
-  function addRecord() {
-    intervalNum++;
-    const now = new Date();
-    const timeLabel = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const attendance = generateAttendance();
+    labels.push(time);
+    values.push(count);
 
-    labels.push(timeLabel);
-    data.push(attendance);
-
-    if (labels.length > MAX_RECORDS) {
+    if (labels.length > 8) {
       labels.shift();
-      data.shift();
+      values.shift();
     }
 
-    updateCount++;
-    if (attendance > peak) peak = attendance;
-
-    // Update chart
-    chart.data.labels = [...labels];
-    chart.data.datasets[0].data = [...data];
     chart.update();
-
-    // Update stats
-    document.getElementById('currentCount').textContent = attendance;
-    document.getElementById('peakCount').textContent = peak;
-    document.getElementById('totalUpdates').textContent = updateCount;
   }
 
-  function startCounter() {
-    if (intervalId) return;
-    paused = false;
-    addRecord();
-    intervalId = setInterval(addRecord, INTERVAL_MS);
+  function start() {
+    if (timer) return;
+    addData();
+    timer = setInterval(addData, 3000);
     document.getElementById('startBtn').disabled = true;
-    document.getElementById('pauseBtn').disabled = false;
   }
 
-  function pauseCounter() {
-    if (paused) {
-      // Resume
-      addRecord();
-      intervalId = setInterval(addRecord, INTERVAL_MS);
-      paused = false;
-      document.getElementById('pauseBtn').textContent = '⏸ Pause';
-      document.getElementById('startBtn').disabled = true;
-    } else {
-      // Pause
-      clearInterval(intervalId);
-      intervalId = null;
-      paused = true;
-      document.getElementById('pauseBtn').textContent = '▶ Resume';
-      document.getElementById('startBtn').disabled = true;
-    }
-  }
-
-  function resetCounter() {
-    clearInterval(intervalId);
-    intervalId = null;
-    paused = false;
-    labels = [];
-    data = [];
-    updateCount = 0;
-    peak = 0;
-    intervalNum = 0;
-    chart.data.labels = [];
-    chart.data.datasets[0].data = [];
+  function reset() {
+    clearInterval(timer);
+    timer = null;
+    labels.length = 0;
+    values.length = 0;
     chart.update();
-    document.getElementById('currentCount').textContent = '—';
-    document.getElementById('peakCount').textContent = '—';
-    document.getElementById('totalUpdates').textContent = '0';
     document.getElementById('startBtn').disabled = false;
-    document.getElementById('pauseBtn').disabled = true;
-    document.getElementById('pauseBtn').textContent = '⏸ Pause';
   }
 </script>
 
