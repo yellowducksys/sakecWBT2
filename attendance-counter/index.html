@@ -38,21 +38,33 @@
 </head>
 <body>
 
-  <h2>📊 Live Student Attendance Counter</h2>
-  <p>Generates a new attendance value every 3 seconds &bull; Shows last 8 records</p>
+  <h2>&#128204; Live Student Attendance Counter</h2>
+  <p>Hourly attendance data &bull; Updates every 3 seconds &bull; Shows last 8 records</p>
 
   <canvas id="myChart"></canvas>
 
   <div class="btns">
-    <button id="startBtn" onclick="start()">▶ Start</button>
-    <button id="resetBtn" onclick="reset()">↺ Reset</button>
+    <button id="startBtn" onclick="start()">&#9654; Start</button>
+    <button id="resetBtn" onclick="reset()">&#8635; Reset</button>
   </div>
 
   <div class="footer">SAKEC &bull; Web Technology &bull; Roll No. 32 &bull; Harsh Mange</div>
 
 <script>
+  // Preset attendance values near 63, looped through
+  const attendanceData = [61, 63, 65, 62, 64, 60, 63, 66, 61, 65, 63, 62, 64, 60, 63, 65];
+
+  // Hourly labels starting from 8:00 AM
+  const hourlyLabels = [
+    "8:00 AM",  "9:00 AM",  "10:00 AM", "11:00 AM",
+    "12:00 PM", "1:00 PM",  "2:00 PM",  "3:00 PM",
+    "4:00 PM",  "5:00 PM",  "6:00 PM",  "7:00 PM",
+    "8:00 PM",  "9:00 PM",  "10:00 PM", "11:00 PM"
+  ];
+
   const labels = [];
   const values = [];
+  let index = 0;
   let timer = null;
 
   const chart = new Chart(document.getElementById('myChart'), {
@@ -72,22 +84,20 @@
         y: {
           beginAtZero: true,
           min: 0,
-          max: 60,
+          max: 70,
           title: { display: true, text: 'No. of Students' }
         },
         x: {
-          title: { display: true, text: 'Time' }
+          title: { display: true, text: 'Hour' }
         }
       }
     }
   });
 
   function addData() {
-    const time = new Date().toLocaleTimeString();
-    const count = Math.floor(Math.random() * 51) + 10; // 10 to 60
-
-    labels.push(time);
-    values.push(count);
+    labels.push(hourlyLabels[index % hourlyLabels.length]);
+    values.push(attendanceData[index % attendanceData.length]);
+    index++;
 
     if (labels.length > 8) {
       labels.shift();
@@ -107,6 +117,7 @@
   function reset() {
     clearInterval(timer);
     timer = null;
+    index = 0;
     labels.length = 0;
     values.length = 0;
     chart.update();
