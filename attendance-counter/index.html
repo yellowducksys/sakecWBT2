@@ -11,17 +11,33 @@
       background: #f0f4ff;
       padding: 30px;
     }
-    h2 { color: #333; margin-bottom: 6px; }
-    p  { color: #666; margin-bottom: 20px; font-size: 14px; }
-    canvas {
+    h2 { 
+      color: #333; 
+      margin-bottom: 6px; 
+    }
+    p  { 
+      color: #666; 
+      margin-bottom: 20px; 
+      font-size: 14px; 
+    }
+    .chart-container {
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;  
+      margin: 0 auto;
       background: white;
       border: 1px solid #ddd;
       border-radius: 10px;
       padding: 10px;
-      max-width: 700px;
-      width: 100%;
+      box-sizing: border-box;
     }
-    .btns { margin-top: 20px; }
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .btns { 
+      margin-top: 20px; 
+    }
     button {
       margin: 5px;
       padding: 10px 24px;
@@ -30,43 +46,48 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    #startBtn { background: #4CAF50; color: white; }
-    #resetBtn { background: #f44336; color: white; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .footer { margin-top: 20px; color: #aaa; font-size: 13px; }
+    #startBtn { 
+      background: #4CAF50; 
+      color: white; 
+    }
+    #resetBtn { 
+      background: #f44336; 
+      color: white; 
+    }
+    button:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed; 
+    }
+    .footer { 
+      margin-top: 20px; 
+      color: #aaa; 
+      font-size: 13px; 
+    }
   </style>
 </head>
 <body>
-
-  <h2>&#128204; Live Student Attendance Counter</h2>
-  <p>Hourly attendance data &bull; Updates every 3 seconds &bull; Shows last 8 records</p>
-
-  <canvas id="myChart"></canvas>
-
-  <div class="btns">
-    <button id="startBtn" onclick="start()">&#9654; Start</button>
-    <button id="resetBtn" onclick="reset()">&#8635; Reset</button>
+  <h2>Live Student Attendance Counter</h2>
+  <p>Hourly attendance data</p>
+  <div class="chart-container">
+    <canvas id="myChart"></canvas>
   </div>
-
-  <div class="footer">SAKEC &bull; Web Technology &bull; Roll No. 32 &bull; Harsh Mange</div>
-
+  <div class="btns">
+    <button id="startBtn" onclick="start()">Start</button>
+    <button id="resetBtn" onclick="reset()">Reset</button>
+  </div>
+  <div class="footer">SAKEC • Web Technology • Roll No. 32 • Harsh Mange</div>
 <script>
-  // Preset attendance values near 63, looped through
   const attendanceData = [61, 63, 65, 62, 64, 60, 63, 66, 61, 65, 63, 62, 64, 60, 63, 65];
-
-  // Hourly labels starting from 8:00 AM
   const hourlyLabels = [
     "8:00 AM",  "9:00 AM",  "10:00 AM", "11:00 AM",
     "12:00 PM", "1:00 PM",  "2:00 PM",  "3:00 PM",
     "4:00 PM",  "5:00 PM",  "6:00 PM",  "7:00 PM",
     "8:00 PM",  "9:00 PM",  "10:00 PM", "11:00 PM"
   ];
-
   const labels = [];
   const values = [];
   let index = 0;
   let timer = null;
-
   const chart = new Chart(document.getElementById('myChart'), {
     type: 'bar',
     data: {
@@ -74,12 +95,14 @@
       datasets: [{
         label: 'Students Present',
         data: values,
-        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-        borderColor: 'rgba(54, 162, 235, 1)',
+        backgroundColor: 'rgba(144, 238, 144, 0.8)',
+        borderColor: 'rgba(144, 238, 144, 1)',
         borderWidth: 1
       }]
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,  // obey container height [web:1][web:43]
       scales: {
         y: {
           beginAtZero: true,
@@ -93,27 +116,22 @@
       }
     }
   });
-
   function addData() {
     labels.push(hourlyLabels[index % hourlyLabels.length]);
     values.push(attendanceData[index % attendanceData.length]);
     index++;
-
     if (labels.length > 8) {
       labels.shift();
       values.shift();
     }
-
     chart.update();
   }
-
   function start() {
     if (timer) return;
     addData();
     timer = setInterval(addData, 3000);
     document.getElementById('startBtn').disabled = true;
   }
-
   function reset() {
     clearInterval(timer);
     timer = null;
@@ -124,6 +142,5 @@
     document.getElementById('startBtn').disabled = false;
   }
 </script>
-
 </body>
 </html>
